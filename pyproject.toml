@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rapflow-skill"
+version = "1.0.0"
+description = "Chinese Rap Lyric Analysis Tool for LLM Function Call"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "1689589115"}
+]
+keywords = ["rap", "lyrics", "rhyme", "analysis", "nlp", "chinese", "llm"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "pydantic>=2.8",
+    "jieba>=0.42.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/1689589115/rapflow-skill"
+Repository = "https://github.com/1689589115/rapflow-skill"
+Issues = "https://github.com/1689589115/rapflow-skill/issues"
+
+[tool.setuptools.packages.find]
+include = ["skill*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
