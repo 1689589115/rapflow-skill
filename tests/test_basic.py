@@ -1,5 +1,5 @@
 """
-Basic unit tests for rapflow-skill
+Basic unit tests for rapflow-skill v1.1.0
 """
 
 import sys
@@ -13,7 +13,7 @@ def test_import():
     """Test that all modules can be imported"""
     print("\n[TEST] module imports")
     from skill.core import RapFlowSkill
-    from skill.schemas import RapFlowInput, RapFlowOutput, LineResult, RhymeUnit
+    from skill.schemas import RapFlowInput, RapFlowOutput, LineResult, RhymeUnit, MultiRhymeInfo, MultiRhymeStats
     from skill.utils import clean_lyric, split_lines
     from skill.rhyme_analyzer import RhymeAnalyzer
     print("  [PASS] all imports OK")
@@ -59,17 +59,23 @@ def test_rhyme_analyzer():
     from skill.rhyme_analyzer import RhymeAnalyzer
     
     analyzer = RhymeAnalyzer()
-    line = "我唱歌的flow 非常优秀"
-    rhyme_unit = analyzer.calc_line_rhyme(line, [])
-    assert rhyme_unit is not None, "rhyme unit must not be None"
-    print(f"  [PASS] single line analyzed (level={rhyme_unit.level}, rhymes={rhyme_unit.rhymes})")
     
-    # Multi-line
+    # Test single line rhyme extraction
+    line = "我唱歌的flow 非常优秀"
+    rhymes = analyzer.extract_line_rhymes(line)
+    assert len(rhymes) > 0, "should find some rhymes"
+    print(f"  [PASS] single line analyzed (rhymes={len(rhymes)})")
+    
+    # Test multi-line analysis
     lines_list = ["我唱歌的flow 非常优秀", "这个beat让我忍不住抖"]
-    results, avg_d, summary = analyzer.analyse_lyric(lines_list, mark_breath=False)
+    results, avg_d, summary, multi_stats = analyzer.analyse_lyric(lines_list, mark_breath=False, detect_multi_rhyme=True)
     assert len(results) == 2, f"expected 2 results, got {len(results)}"
     assert avg_d >= 0, "avg density negative"
     print(f"  [PASS] multi line analyzed (density={avg_d:.3f})")
+    
+    # Test multi-rhyme detection
+    assert multi_stats is not None, "multi_rhyme_stats should not be None"
+    print(f"  [PASS] multi-rhyme stats generated")
 
 
 def test_rapflow_skill():
@@ -83,7 +89,8 @@ def test_rapflow_skill():
         "text": lyrics,
         "mode": "auto",
         "mark_breath": True,
-        "max_rhyme_level": 4
+        "max_rhyme_level": 4,
+        "detect_multi_rhyme": True
     })
     assert result["success"] == True, f"should succeed, error: {result.get('summary')}"
     assert result["total_lines"] == 2, f"lines={result['total_lines']}"
@@ -94,6 +101,10 @@ def test_rapflow_skill():
     assert schema["name"] == "rapflow_skill"
     assert "parameters" in schema
     print(f"  [PASS] function schema (name={schema['name']})")
+    
+    # Check multi-rhyme feature
+    assert "multi_rhyme_stats" in result, "multi_rhyme_stats should be in result"
+    print(f"  [PASS] multi-rhyme feature enabled")
 
 
 def test_all_modes():
@@ -104,7 +115,7 @@ def test_all_modes():
     skill = RapFlowSkill()
     lyrics = "测试歌词\n第二行"
     for m in ["auto", "strict", "casual"]:
-        r = skill.run({"text": lyrics, "mode": m})
+        r = skill.run({"text": lyrics, "mode": m, "detect_multi_rhyme": True})
         assert r["success"], f"{m} mode failed"
         print(f"  [PASS] mode={m}")
 
@@ -116,7 +127,7 @@ def test_json_output():
     
     skill = RapFlowSkill()
     lyrics = "测试文本"
-    result = skill.run({"text": lyrics})
+    result = skill.run({"text": lyrics, "detect_multi_rhyme": True})
     
     # Verify it serializes to JSON without errors
     json_str = json.dumps(result, ensure_ascii=False, indent=2)
@@ -124,6 +135,7 @@ def test_json_output():
     assert "success" in parsed
     assert "lines_result" in parsed
     assert "summary" in parsed
+    assert "multi_rhyme_stats" in parsed
     print(f"  [PASS] JSON serialization OK ({len(json_str)} bytes)")
     print(f"  Output preview:")
     print(json_str[:500])
@@ -133,7 +145,7 @@ def main():
     """Run all tests"""
     sep = "=" * 60
     print(sep)
-    print("RapFlow-Skill Tests")
+    print("RapFlow-Skill v1.1.0 Tests")
     print(sep)
     
     tests = [

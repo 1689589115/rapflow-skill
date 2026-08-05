@@ -1,24 +1,25 @@
 """
-Skill主入口 - 为LLM Function Call提供统一接口
+Skill主入口 - 为LLM Function Call提供统一接口 - v1.1.0增强版
 """
 
 import json
 from typing import Dict, Any
-from .schemas import RapFlowInput, RapFlowOutput, LineResult, RhymeUnit
+from .schemas import RapFlowInput, RapFlowOutput, LineResult, RhymeUnit, MultiRhymeInfo, MultiRhymeStats
 from .utils import clean_lyric, split_lines
 from .rhyme_analyzer import RhymeAnalyzer
 
 
 class RapFlowSkill:
     """
-    RapFlow Skill - 中文说唱文本分析技能
+    RapFlow Skill - 中文说唱文本分析技能 - v1.1.0
     
     功能：
     - 押韵检测
     - 韵母提取
-    - 多押识别
+    - 多押识别（新增）
     - 换气标记
     - 押韵密度统计
+    - 多押统计分析（新增）
     """
     
     def __init__(self):
@@ -27,6 +28,7 @@ class RapFlowSkill:
         self.description = """
         中文说唱文本分析工具，提供押韵检测、韵母提取、多押识别、换气标记等功能。
         分析说唱歌词的押韵结构，输出结构化JSON数据，支持大模型Function Call调用。
+        v1.1.0新增：自动识别单押、双押、三押、四押、五押+结构。
         """
         
         # 内置Function Schema（OpenAI格式）
@@ -54,6 +56,11 @@ class RapFlowSkill:
                         "description": "最大押韵等级（1-6）",
                         "minimum": 1,
                         "maximum": 6
+                    },
+                    "detect_multi_rhyme": {
+                        "type": "boolean",
+                        "description": "是否检测多押（单押/双押/三押/四押/五押+）",
+                        "default": True
                     }
                 },
                 "required": ["text"]
@@ -65,7 +72,7 @@ class RapFlowSkill:
         统一对外入口
         
         Args:
-            params: 参数字典，包含 text, mode, mark_breath, max_rhyme_level
+            params: 参数字典，包含 text, mode, mark_breath, max_rhyme_level, detect_multi_rhyme
             
         Returns:
             分析结果字典（可序列化为JSON）
@@ -86,10 +93,11 @@ class RapFlowSkill:
                 max_level=input_model.max_rhyme_level
             )
             
-            # 执行分析
-            results, avg_density, summary = analyzer.analyse_lyric(
+            # 执行分析（支持多押检测）
+            results, avg_density, summary, multi_stats = analyzer.analyse_lyric(
                 lines,
-                mark_breath=input_model.mark_breath
+                mark_breath=input_model.mark_breath,
+                detect_multi_rhyme=input_model.detect_multi_rhyme
             )
             
             # 构建输出
@@ -99,7 +107,8 @@ class RapFlowSkill:
                 total_lines=len(lines),
                 avg_rhyme_density=avg_density,
                 lines_result=results,
-                summary=summary
+                summary=summary,
+                multi_rhyme_stats=multi_stats
             )
             
             return output.model_dump()
@@ -112,7 +121,8 @@ class RapFlowSkill:
                 "total_lines": 0,
                 "avg_rhyme_density": 0.0,
                 "lines_result": [],
-                "summary": f"分析失败: {str(e)}"
+                "summary": f"分析失败: {str(e)}",
+                "multi_rhyme_stats": None
             }
     
     def get_function_schema(self) -> Dict[str, Any]:
@@ -131,18 +141,30 @@ skill = RapFlowSkill()
 
 if __name__ == "__main__":
     # 测试示例
-    test_lyrics = """
-    我唱歌的flow 非常优秀
-    这个beat让我忍不住抖
-    我的韵脚像子弹一样透
-    每一个字都充满力量够
-    """
+    test_lyrics = """小镇的男孩儿现在做着嘻哈这门生意
+我们不姓谢但也是老板儿
+在卡座里面撩妹儿
+在头等舱里拿范儿
+在舞台上面洒水儿"""
     
     result = skill.run({
         "text": test_lyrics,
         "mode": "auto",
         "mark_breath": True,
-        "max_rhyme_level": 4
+        "max_rhyme_level": 4,
+        "detect_multi_rhyme": True
     })
     
     print(json.dumps(result, ensure_ascii=False, indent=2))
+    
+    # 显示多押统计
+    if result.get('multi_rhyme_stats'):
+        stats = result['multi_rhyme_stats']
+        print("\n" + "=" * 60)
+        print("多押统计")
+        print("=" * 60)
+        print(f"总行数: {stats['total_lines']}")
+        print(f"单押: {stats['single_rhyme_lines']}行")
+        print(f"双押: {stats['double_rhyme_lines']}行")
+        print(f"三押: {stats['triple_rhyme_lines']}行")
+        print(f"最常见模式: {stats['most_common_pattern']}")

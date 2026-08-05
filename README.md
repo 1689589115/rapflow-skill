@@ -1,5 +1,7 @@
 # RapFlow-Skill
 
+**v1.1.0** - 新增多押检测功能
+
 中文说唱文本分析技能，面向LLM Function Call的押韵分析工具。
 
 ## 简介
@@ -101,7 +103,36 @@ max_rhyme_level	int	否	最大押韵等级（1-6），默认 4
 {
   "success": true,
   "mode": "auto",
-  "total_lines": 8,
+  "total_lines": 2,
+  "avg_rhyme_density": 0.312,
+  "lines_result": [
+    {
+      "line_index": 0,
+      "text": "小镇的男孩儿现在做着嘻哈这门生意",
+      "rhyme": {
+        "rhymes": ["ing", "un", "ie", "uo", "ai"],
+        "level": 3,
+        "density": 0.312
+      },
+      "multi_rhyme": {
+        "type": "四押",
+        "count": 4,
+        "rhyme_combinations": [{"ai": 1}, {"ing": 1}, {"uo": 1}, {"ie": 1}],
+        "examples": ["生意(yi)", "小(xiao)", "儿(er)", "做(zi)"]
+      },
+      "breath_mark": "小镇的男孩儿 / 现在做着嘻哈 / 这门生意"
+    }
+  ],
+  "summary": "共2行，平均押韵密度0.312，检测到四押结构",
+  "multi_rhyme_stats": {
+    "total_lines": 2,
+    "single_rhyme_lines": 0,
+    "double_rhyme_lines": 0,
+    "triple_rhyme_lines": 0,
+    "quad_rhyme_lines": 2,
+    "most_common_pattern": "四押"
+  }
+}nes": 8,
   "avg_rhyme_density": 0.75,
   "lines_result": [
     {

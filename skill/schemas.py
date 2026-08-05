@@ -1,9 +1,9 @@
 """
-Pydantic v2 参数模型定义
+Pydantic v2 参数模型定义 - v1.1.0（含多押检测）
 定义输入输出数据结构，严格匹配 OpenAI Function Call 格式
 """
 
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
 
 
@@ -14,11 +14,22 @@ class RhymeUnit(BaseModel):
     density: float = Field(description="押韵密度，韵脚数量与行长的比例")
 
 
+class MultiRhymeInfo(BaseModel):
+    """多押分析结果"""
+    type: str = Field(description="押韵类型：单押/双押/三押/四押/五押+")
+    count: int = Field(description="该行的韵母组合数")
+    rhyme_combinations: List[Dict[str, int]] = Field(
+        description="韵母组合详情，如 [{'ang': 2}, {'i': 3}] 表示ang出现2次，i出现3次"
+    )
+    examples: List[str] = Field(description="展示多押的具体歌词片段")
+
+
 class LineResult(BaseModel):
     """单行分析结果"""
     line_index: int = Field(description="行索引（从0开始）")
     text: str = Field(description="清洗后的歌词文本")
     rhyme: Optional[RhymeUnit] = Field(default=None, description="押韵信息")
+    multi_rhyme: Optional[MultiRhymeInfo] = Field(default=None, description="多押分析")
     breath_mark: Optional[str] = Field(default=None, description="带换气标记的文本")
 
 
@@ -28,16 +39,30 @@ class RapFlowInput(BaseModel):
     mode: str = Field(default="auto", description="分析模式：auto/strict/casual")
     mark_breath: bool = Field(default=True, description="是否添加换气标记")
     max_rhyme_level: int = Field(default=4, ge=1, le=6, description="最大押韵等级")
+    detect_multi_rhyme: bool = Field(default=True, description="是否检测多押")
 
     class Config:
         json_schema_extra = {
             "example": {
-                "text": "我唱歌的flow 非常优秀\n这个beat让我忍不住抖",
+                "text": "小镇的男孩儿现在做着嘻哈这门生意\n我们不姓谢但也是老板儿",
                 "mode": "auto",
                 "mark_breath": True,
-                "max_rhyme_level": 4
+                "max_rhyme_level": 4,
+                "detect_multi_rhyme": True
             }
         }
+
+
+class MultiRhymeStats(BaseModel):
+    """多押统计信息"""
+    total_lines: int = Field(description="总行数")
+    single_rhyme_lines: int = Field(description="单押行数")
+    double_rhyme_lines: int = Field(description="双押行数")
+    triple_rhyme_lines: int = Field(description="三押行数")
+    quad_rhyme_lines: int = Field(description="四押行数")
+    multi_rhyme_lines: int = Field(description="五押及以上行数")
+    most_common_pattern: str = Field(description="最常见的押韵模式")
+    detailed_examples: List[Dict] = Field(description="详细示例")
 
 
 class RapFlowOutput(BaseModel):
@@ -48,6 +73,7 @@ class RapFlowOutput(BaseModel):
     avg_rhyme_density: float = Field(description="平均押韵密度")
     lines_result: List[LineResult] = Field(description="每行分析结果")
     summary: str = Field(description="分析总结文本")
+    multi_rhyme_stats: Optional[MultiRhymeStats] = Field(default=None, description="多押统计信息")
 
     class Config:
         json_schema_extra = {
@@ -55,16 +81,31 @@ class RapFlowOutput(BaseModel):
                 "success": True,
                 "mode": "auto",
                 "total_lines": 2,
-                "avg_rhyme_density": 0.8,
+                "avg_rhyme_density": 0.5,
                 "lines_result": [
                     {
                         "line_index": 0,
-                        "text": "我唱歌的flow 非常优秀",
-                        "rhyme": {"rhymes": ["iu"], "level": 1, "density": 0.5},
-                        "breath_mark": "我唱歌的flow / 非常优秀"
+                        "text": "小镇的男孩儿现在做着嘻哈这门生意",
+                        "rhyme": {"rhymes": ["ing", "un", "ie", "uo", "ai"], "level": 3, "density": 0.312},
+                        "multi_rhyme": {
+                            "type": "双押",
+                            "count": 2,
+                            "rhyme_combinations": [{"ai": 1}, {"ing": 1}],
+                            "examples": ["生意(yi)", "儿(er)"]
+                        },
+                        "breath_mark": "小镇的男孩儿 / 现在做着嘻哈 / 这门生意"
                     }
                 ],
-                "summary": "共2行，平均押韵密度0.8"
+                "summary": "共2行，平均押韵密度0.5，检测到双押结构",
+                "multi_rhyme_stats": {
+                    "total_lines": 2,
+                    "single_rhyme_lines": 0,
+                    "double_rhyme_lines": 2,
+                    "triple_rhyme_lines": 0,
+                    "quad_rhyme_lines": 0,
+                    "multi_rhyme_lines": 0,
+                    "most_common_pattern": "双押",
+                    "detailed_examples": []
+                }
             }
         }
-    
