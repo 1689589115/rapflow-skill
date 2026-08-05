@@ -1,6 +1,6 @@
 """
-Core Rhyme Analysis Algorithm - v1.2.0 (Expanded Rhyme Database)
-基于pypinyin自动生成的完整韵母映射 + 热门说唱分析优化
+Core Rhyme Analysis Algorithm - v1.3.0 (Rhyme Normalization)
+基于pypinyin自动生成 + 韵母归一化优化
 """
 
 from typing import Dict, List, Optional, Tuple
@@ -9,10 +9,82 @@ from .schemas import LineResult, RhymeUnit, MultiRhymeInfo, MultiRhymeStats
 
 
 # ============================================
-# 扩展版韵母映射表 - v1.2.0
-# 基于pypinyin自动生成，覆盖20,992个汉字
-# 分析了热门中文说唱歌词的押韵特点
+# 韵母归一化映射表 - v1.3.0
+# 将相似韵母合并，减少误判
 # ============================================
+
+# 归一化规则：将相似韵母映射到标准韵母
+NORMALIZATION_MAP = {
+    # 鼻韵母归一化（关键）
+    'ing': 'in',      # ing → in
+    'iong': 'in',     # iong → in
+    'iang': 'ian',    # iang → ian
+    'uang': 'uan',    # uang → uan
+    'eng': 'en',      # eng → en
+    'ong': 'en',      # ong → en (方言/口语中常混用)
+    
+    # 元音归一化
+    'iou': 'ou',      # iou → ou
+    'uei': 'ui',      # uei → ui
+    'uen': 'un',      # uen → un
+    
+    # 保持不变的常用韵母
+    'a': 'a',
+    'ai': 'ai',
+    'an': 'an',
+    'ao': 'ao',
+    'e': 'e',
+    'ei': 'ei',
+    'en': 'en',
+    'er': 'er',
+    'i': 'i',
+    'ia': 'ia',
+    'ian': 'ian',
+    'iao': 'iao',
+    'ie': 'ie',
+    'in': 'in',
+    'iu': 'iu',
+    'n': 'n',        # 特殊鼻音
+    'o': 'o',
+    'ou': 'ou',
+    'u': 'u',
+    'ua': 'ua',
+    'uai': 'uai',
+    'uan': 'uan',
+    'ue': 'ue',
+    'ui': 'ui',
+    'un': 'un',
+    'uo': 'uo',
+    'v': 'v',        #  ü
+}
+
+
+class RhymeNormalizer:
+    """韵母归一化器"""
+    
+    @staticmethod
+    def normalize(final: str) -> str:
+        """将韵母归一化到标准形式"""
+        if not final:
+            return final
+        return NORMALIZATION_MAP.get(final, final)
+    
+    @staticmethod
+    def normalize_list(rhymes: List[str]) -> List[str]:
+        """批量归一化韵母列表"""
+        return [RhymeNormalizer.normalize(f) for f in rhymes]
+    
+    @staticmethod
+    def get_normalized_stats(rhymes: List[str]) -> Dict:
+        """获取归一化后的统计信息"""
+        normalized = RhymeNormalizer.normalize_list(rhymes)
+        counter = Counter(normalized)
+        return {
+            'normalized': normalized,
+            'unique_count': len(counter),
+            'distribution': dict(counter.most_common())
+        }
+
 
 def _load_extended_rhyme_map():
     """加载扩展版韵母映射（使用pypinyin动态生成）"""
@@ -42,27 +114,17 @@ def _get_basic_rhyme_map():
         '是': 'i', '此': 'i', '地': 'i', '第': 'i', '理': 'i',
         '里': 'i', '题': 'i', '其': 'i', '七': 'i', '骑': 'i',
         '齐': 'i', '气': 'i', '意': 'i', '艺': 'i', '易': 'i',
-        '议': 'i', '益': 'i', '翼': 'i', '忆': 'i', '役': 'i',
         # e韵高频字
         '额': 'e', '哥': 'e', '河': 'e', '和': 'e', '火': 'e',
         '过': 'e', '客': 'e', '乐': 'e', '说': 'e', '天': 'e',
         '写': 'e', '学': 'e', '这': 'e',
         # uo韵高频字
         '我': 'uo', '说': 'uo', '过': 'uo', '火': 'uo', '活': 'uo',
-        '货': 'uo', '获': 'uo', '祸': 'uo', '扩': 'uo', '括': 'uo',
-        '霍': 'uo', '豁': 'uo', '涡': 'uo', '锅': 'uo', '国': 'uo',
-        '果': 'uo', '歌': 'uo', '格': 'uo', '革': 'uo', '合': 'uo',
-        '何': 'uo', '和': 'uo', '核': 'uo', '河': 'uo', '荷': 'uo',
         # u韵高频字
         '不': 'u', '去': 'u', '路': 'u', '舞': 'u', '苦': 'u',
-        '书': 'u', '出': 'u', '图': 'u', '初': 'u', '福': 'u',
-        '步': 'u', '物': 'u', '目': 'u', '木': 'u', '米': 'u',
-        '马': 'u', '骂': 'u', '满': 'u', '慢': 'u', '梦': 'u',
         # an韵高频字
         '安': 'an', '班': 'an', '边': 'an', '办': 'an', '半': 'an',
         '但': 'an', '般': 'an', '翻': 'an', '管': 'an', '汉': 'an',
-        '还': 'an', '欢': 'an', '换': 'an', '见': 'an', '千': 'an',
-        '钱': 'an', '前': 'an', '浅': 'an', '扇': 'an', '山': 'an',
         # ang韵高频字
         '昂': 'ang', '棒': 'ang', '唱': 'ang', '长': 'ang', '厂': 'ang',
         '场': 'ang', '方': 'ang', '帮': 'ang', '刚': 'ang', '光': 'ang',
@@ -79,37 +141,25 @@ def _get_basic_rhyme_map():
         # ing韵高频字
         '更': 'ing', '风': 'ing', '疯': 'ing', '红': 'ing', '空': 'ing',
         '冷': 'ing', '梦': 'ing', '名': 'ing', '平': 'ing', '轻': 'ing',
-        '情': 'ing', '晴': 'ing', '胜': 'ing', '声': 'ing', '生': 'ing',
         # iong韵高频字
-        '用': 'iong', '中': 'iong', '动': 'iong', '风': 'iong',
-        '红': 'iong', '空': 'iong', '龙': 'iong', '梦': 'iong',
+        '用': 'iong', '中': 'iong', '动': 'iong', '龙': 'iong',
         '雄': 'iong', '永': 'iong', '勇': 'iong', '拥': 'iong',
         # ou韵高频字
         '后': 'ou', '头': 'ou', '手': 'ou', '走': 'ou', '口': 'ou',
-        '流': 'ou', '友': 'ou', '候': 'ou',
         # ue韵高频字
         '决': 'ue', '月': 'ue', '雪': 'ue', '约': 'ue', '绝': 'ue',
         # ian韵高频字
-        '安': 'ian', '班': 'ian', '边': 'ian', '办': 'ian', '半': 'ian',
-        '点': 'ian', '见': 'ian', '钱': 'ian', '前': 'ian', '天': 'ian',
-        '县': 'ian', '线': 'ian', '眼': 'ian', '言': 'ian', '原': 'ian',
-        '烟': 'ian', '严': 'ian', '颜': 'ian', '研': 'ian', '淹': 'ian',
+        '安': 'ian', '班': 'ian', '边': 'ian', '见': 'ian', '钱': 'ian',
         # iang韵高频字
         '将': 'iang', '强': 'iang', '想': 'iang', '样': 'iang', '向': 'iang',
-        '阳': 'iang', '杨': 'iang', '养': 'iang', '摇': 'iang', '药': 'iang',
         # iao韵高频字
         '叫': 'iao', '跳': 'iao', '笑': 'iao', '小': 'iao', '要': 'iao',
-        '早': 'iao', '造': 'iao', '照': 'iao', '找': 'iao', '走': 'iao',
         # ie韵高频字
-        '别': 'ie', '说': 'ie', '特': 'ie', '这': 'ie', '字': 'ie',
-        # un韵高频字
-        '本': 'un', '门': 'un', '人': 'un', '神': 'un', '身': 'un',
-        '心': 'un', '真': 'un', '针': 'un', '春': 'un', '纯': 'un',
+        '别': 'ie', '说': 'ie', '这': 'ie', '字': 'ie',
+        # uan韵高频字
+        '安': 'uan', '办': 'uan', '关': 'uan', '看': 'uan', '难': 'uan',
         # uang韵高频字
         '黄': 'uang', '光': 'uang', '狂': 'uang', '窗': 'uang', '双': 'uang',
-        # uan韵高频字
-        '安': 'uan', '办': 'uan', '半': 'uan', '关': 'uan', '看': 'uan',
-        '难': 'uan', '团': 'uan', '完': 'uan', '碗': 'uan', '湾': 'uan',
     }
 
 
@@ -118,17 +168,23 @@ FINAL_MAP = _load_extended_rhyme_map()
 
 
 class RhymeAnalyzer:
-    """Chinese Rap Rhyme Analyzer - v1.2.0 (Expanded Database)"""
+    """Chinese Rap Rhyme Analyzer - v1.3.0 (with Rhyme Normalization)"""
     
-    def __init__(self, mode: str = "auto", max_level: int = 4):
+    def __init__(self, mode: str = "auto", max_level: int = 4, 
+                 normalize: bool = True):
         self.mode = mode
         self.max_level = max_level
         self.final_map = FINAL_MAP
+        self.normalize = normalize  # 是否启用归一化
     
     def get_char_final(self, char: str) -> Optional[str]:
         """Get the final of a single Chinese character"""
         if char in self.final_map:
-            return self.final_map[char]
+            final = self.final_map[char]
+            # 应用归一化
+            if self.normalize:
+                return RhymeNormalizer.normalize(final)
+            return final
         return None
     
     def extract_line_rhymes(self, line: str) -> List[Tuple[str, str, int]]:
@@ -144,18 +200,29 @@ class RhymeAnalyzer:
         
         return rhymes
     
-    def analyze_multi_rhyme(self, rhymes: List[Tuple[str, str, int]]) -> Dict:
+    def analyze_multi_rhyme(self, rhymes: List[Tuple[str, str, int]], 
+                           use_normalized: bool = True) -> Dict:
         """
         Analyze multi-rhyme structure
         
+        Args:
+            rhymes: List of (char, final, position) tuples
+            use_normalized: Whether to use normalized rhymes for analysis
+            
         Returns:
             dict with type, count, combinations, examples
         """
         if not rhymes:
             return {"type": "No rhyme", "count": 0, "combinations": [], "examples": []}
         
+        # 选择使用原始还是归一化韵母
+        if use_normalized and self.normalize:
+            rhyme_list = [RhymeNormalizer.normalize(final) for _, final, _ in rhymes]
+        else:
+            rhyme_list = [final for _, final, _ in rhymes]
+        
         # Count each rhyme
-        rhyme_counter = Counter([final for _, final, _ in rhymes])
+        rhyme_counter = Counter(rhyme_list)
         sorted_rhymes = rhyme_counter.most_common()
         
         unique_count = len(sorted_rhymes)
@@ -179,7 +246,9 @@ class RhymeAnalyzer:
         examples = []
         seen_combos = set()
         for char, final, pos in rhymes:
-            combo_key = f"{char}({final})"
+            # 显示时展示归一化后的韵母，但保留原始汉字
+            norm_final = RhymeNormalizer.normalize(final) if self.normalize else final
+            combo_key = f"{char}({norm_final})"
             if combo_key not in seen_combos:
                 examples.append(combo_key)
                 seen_combos.add(combo_key)
@@ -192,14 +261,22 @@ class RhymeAnalyzer:
         }
     
     def calc_rhyme_level(self, rhymes: List[str], context_finals: List[str]) -> int:
-        """Calculate rhyme level"""
+        """Calculate rhyme level (with normalization support)"""
         if not rhymes:
             return 0
         
-        rhyme_counter = Counter(rhymes)
+        # 应用归一化
+        if self.normalize:
+            norm_rhymes = RhymeNormalizer.normalize_list(rhymes)
+            norm_context = RhymeNormalizer.normalize_list(context_finals)
+        else:
+            norm_rhymes = rhymes
+            norm_context = context_finals
+        
+        rhyme_counter = Counter(norm_rhymes)
         base_level = min(len(rhyme_counter), 3)
         
-        context_match = sum(1 for r in rhymes if r in context_finals)
+        context_match = sum(1 for r in norm_rhymes if r in norm_context)
         match_bonus = min(context_match // 2, 2)
         
         high_freq_bonus = sum(1 for count in rhyme_counter.values() if count >= 3)
@@ -207,8 +284,9 @@ class RhymeAnalyzer:
         total_level = base_level + match_bonus + high_freq_bonus
         return max(1, min(total_level, self.max_level))
     
-    def analyse_lyric(self, lines: List[str], mark_breath: bool = True, detect_multi_rhyme: bool = True) -> Tuple:
-        """Analyze a complete lyric (enhanced version)"""
+    def analyse_lyric(self, lines: List[str], mark_breath: bool = True, 
+                     detect_multi_rhyme: bool = True) -> Tuple:
+        """Analyze a complete lyric (enhanced version with normalization)"""
         if not lines:
             return [], 0.0, "Empty lyrics", None
         
@@ -242,7 +320,7 @@ class RhymeAnalyzer:
                 
                 # Multi-rhyme analysis
                 if detect_multi_rhyme and len(rhyme_list) >= 2:
-                    multi_analysis = self.analyze_multi_rhyme(rhymes)
+                    multi_analysis = self.analyze_multi_rhyme(rhymes, use_normalized=True)
                     multi_rhyme = MultiRhymeInfo(
                         type=multi_analysis["type"],
                         count=multi_analysis["count"],
@@ -328,7 +406,8 @@ class RhymeAnalyzer:
         rhyme_lines = sum(1 for r in results if r.rhyme and r.rhyme.level > 0)
         total_lines = len(lines)
         
-        summary = f"共{total_lines}行，{rhyme_lines}行有押韵，平均押韵密度{avg_density:.3f}"
+        normalize_info = " (已启用韵母归一化)" if self.normalize else ""
+        summary = f"共{total_lines}行，{rhyme_lines}行有押韵，平均押韵密度{avg_density:.3f}{normalize_info}"
         
         best_line = None
         best_level = 0

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rapflow-skill"
-version = "1.2.0"
+version = "1.3.0"
 description = "Chinese Rap Lyric Analysis Tool for LLM Function Call - Multi-Rhyme Detection"
 readme = "README.md"
 license = {text = "MIT"}
@@ -36,7 +36,7 @@ dev = [
 Homepage = "https://github.com/1689589115/rapflow-skill"
 Repository = "https://github.com/1689589115/rapflow-skill"
 Issues = "https://github.com/1689589115/rapflow-skill/issues"
-"Release Notes" = "https://github.com/1689589115/rapflow-skill/releases/tag/v1.2.0"
+"Release Notes" = "https://github.com/1689589115/rapflow-skill/releases/tag/v1.3.0"
 
 [tool.setuptools.packages.find]
 include = ["skill*"]
