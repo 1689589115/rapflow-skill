@@ -158,15 +158,14 @@ class RhymeAnalyzer:
         # Build combination info
         combinations = [{rhyme: count} for rhyme, count in sorted_rhymes[:5]]
         
-        # Extract examples
+        # Extract ALL examples - show every rhyme occurrence without limit
         examples = []
-        seen_rhymes = set()
+        seen_combos = set()
         for char, final, pos in rhymes:
-            if final not in seen_rhymes:
-                examples.append(f"{char}({final})")
-                seen_rhymes.add(final)
-                if len(examples) >= 4:
-                    break
+            combo_key = f"{char}({final})"
+            if combo_key not in seen_combos:
+                examples.append(combo_key)
+                seen_combos.add(combo_key)
         
         return {
             "type": rhyme_type,
