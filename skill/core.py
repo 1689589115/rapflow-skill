@@ -3,27 +3,14 @@ Skill主入口 - 为LLM Function Call提供统一接口 - v1.5.0
 """
 
 import json
-import sys
 from typing import Dict, Any
 from .schemas import (
     RapFlowInput, RapFlowOutput, LineResult, RhymeUnit,
     MultiRhymeInfo, MultiRhymeStats, FlowInfo
 )
-from .utils import clean_lyric, split_lines
+from .utils import clean_lyric, split_lines, _safe_print
 from .rhyme_analyzer import RhymeAnalyzer
 from .flow_analyzer import analyze_flow
-
-
-def _safe_print(*args, **kwargs):
-    """跨平台安全打印，避免 Windows GBK 编码崩溃"""
-    try:
-        print(*args, **kwargs)
-    except UnicodeEncodeError:
-        text = " ".join(str(a) for a in args)
-        text = text.encode(
-            sys.stdout.encoding or "utf-8", errors="replace"
-        ).decode(sys.stdout.encoding or "utf-8")
-        print(text, **kwargs)
 
 
 class RapFlowSkill:

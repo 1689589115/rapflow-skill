@@ -68,15 +68,17 @@ def test_flow_analysis_short():
 def test_flow_analysis_chopper():
     """Test flow analysis with high-density (Chopper-like) lyrics"""
     print("\n[TEST] flow analysis - chopper style")
-    # Chopper style: high syllable count per line
+    # Chopper style: >=14 syllables per line
     lines = [
-        "快速连续flow像子弹一样穿透所有的障碍",
-        "密集韵脚让每一个字都充满力量和不凡",
-        "速度和控制完美结合创造出最震撼的场面",
+        "快嘴flow像子弹穿透所有的障碍现在",
+        "密集韵脚让每一个字都充满力量和",
+        "速度和控制完美结合创造震撼的场面",
+        "这就是chopper风格让所有人为之疯狂",
     ]
-    densities = [0.9, 0.85, 0.88]
+    densities = [0.9, 0.88, 0.85, 0.92]
     result = analyze_flow(lines, densities)
-    assert result["style"] == "Chopper" or result["confidence"] > 0
+    assert result["style"] == "Chopper"
+    assert result["confidence"] >= 0.9
     print(f"  [PASS] chopper detection: {result['style']} (conf={result['confidence']})")
 
 
@@ -163,14 +165,35 @@ def test_all_modes_with_flow():
         print(f"  [PASS] mode={m}, flow={r['flow']['style']}")
 
 
+def test_flow_boom_bap():
+    """Test Boom Bap style detection"""
+    print("\n[TEST] flow analysis - boom bap style")
+    lines = ["小镇的男孩儿现在做着嘻哈", "我们不姓谢但也是老板儿", "在卡座里面撩妹儿"]
+    densities = [0.3, 0.3, 0.3]
+    result = analyze_flow(lines, densities)
+    assert result["style"] == "Boom Bap"
+    print(f"  [PASS] boom bap detection: {result['style']} (conf={result['confidence']})")
+
+
+def test_flow_trap():
+    """Test Trap style detection (repetitive)"""
+    print("\n[TEST] flow analysis - trap style")
+    lines = ["我的flow重复重复重复重复", "我的flow重复重复重复重复"]
+    densities = [0.5, 0.5]
+    result = analyze_flow(lines, densities)
+    assert result["style"] == "Trap"
+    print(f"  [PASS] trap detection: {result['style']} (conf={result['confidence']})")
+
+
 def test_import_all_modules():
     """Test that all new modules can be imported"""
     print("\n[TEST] import all modules")
-    from skill.flow_analyzer import analyze_flow, FLOW_RULES
+    from skill.flow_analyzer import analyze_flow, _count_chinese_syllables
     from skill.utils import insert_breath_mark, _safe_print
     assert callable(analyze_flow)
     assert callable(insert_breath_mark)
-    print(f"  [PASS] flow_analyzer: {len(FLOW_RULES)} styles defined")
+    assert callable(_count_chinese_syllables)
+    print(f"  [PASS] flow_analyzer: analyze_flow OK")
     print(f"  [PASS] utils: insert_breath_mark, _safe_print OK")
 
 

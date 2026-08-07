@@ -194,7 +194,7 @@ class RhymeAnalyzer:
         chars = list(line)
         
         for i, char in enumerate(chars):
-            if '\u4e00' <= char <= '\u9fa5':
+            if '一' <= char <= '龥':
                 final = self.get_char_final(char)
                 if final:
                     rhymes.append((char, final, i))
@@ -310,7 +310,7 @@ class RhymeAnalyzer:
             # Basic rhyme analysis
             if rhyme_list:
                 level = self.calc_rhyme_level(rhyme_list, context_finals)
-                chinese_count = sum(1 for c in line if '\u4e00' <= c <= '\u9fa5')
+                chinese_count = sum(1 for c in line if '一' <= c <= '龥')
                 density = len(rhyme_list) / max(chinese_count, 1)
                 
                 rhyme_unit = RhymeUnit(
