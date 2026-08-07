@@ -6,11 +6,13 @@ import json
 from typing import Dict, Any
 from .schemas import (
     RapFlowInput, RapFlowOutput, LineResult, RhymeUnit,
-    MultiRhymeInfo, MultiRhymeStats, FlowInfo
+    MultiRhymeInfo, MultiRhymeStats, FlowInfo,
+    TonalLineResult, TonalStats, TonalAnalysisResult
 )
 from .utils import clean_lyric, split_lines, _safe_print
 from .rhyme_analyzer import RhymeAnalyzer
 from .flow_analyzer import analyze_flow
+from .tonal_analyzer import analyse_lyric_tones
 
 
 class RapFlowSkill:
@@ -24,6 +26,7 @@ class RapFlowSkill:
     - 换气标记
     - 押韵密度统计
     - Flow节奏分析
+    - 声调搭配分析
     """
 
     def __init__(self):
@@ -33,7 +36,8 @@ class RapFlowSkill:
         中文说唱文本分析工具，提供押韵检测、韵母提取、多押识别、换气标记、
         Flow节奏分析等功能。分析说唱歌词的押韵结构，输出结构化JSON数据，
         支持大模型Function Call调用。
-        v1.5.0新增：Flow节奏分析（Boom Bap/Trap/Drill/Chopper/Melodic）。
+        v1.5.0新增：Flow节奏分析（Boom Bap/Trap/Drill/Chopper/Melodic）、
+        声调搭配分析。
         """
 
         # 内置Function Schema（OpenAI格式）
@@ -70,6 +74,11 @@ class RapFlowSkill:
                     "analyze_flow": {
                         "type": "boolean",
                         "description": "是否进行Flow节奏分析",
+                        "default": True
+                    },
+                    "analyze_tonal": {
+                        "type": "boolean",
+                        "description": "是否进行声调搭配分析",
                         "default": True
                     }
                 },
@@ -126,6 +135,31 @@ class RapFlowSkill:
                     details=flow_result["details"],
                 )
 
+            # 声调搭配分析
+            tonal_info = None
+            if input_model.analyze_tonal:
+                tonal_result = analyse_lyric_tones(lines)
+                tonal_lines = [
+                    TonalLineResult(
+                        line_index=d["line_index"],
+                        tone_sequence=d["tone_sequence"],
+                        pattern_type=d["pattern_type"],
+                        tonal_entropy=d["tonal_entropy"],
+                        rising_ratio=d["rising_ratio"],
+                        falling_ratio=d["falling_ratio"],
+                    )
+                    for d in tonal_result["lines"]
+                ]
+                tonal_info = TonalAnalysisResult(
+                    lines=tonal_lines,
+                    stats=TonalStats(
+                        avg_entropy=tonal_result["stats"]["avg_entropy"],
+                        dominant_pattern=tonal_result["stats"]["dominant_pattern"],
+                        overall_fluidity_score=tonal_result["stats"]["overall_fluidity_score"],
+                    ),
+                    feedback=tonal_result["feedback"],
+                )
+
             # 构建输出
             output = RapFlowOutput(
                 success=True,
@@ -136,6 +170,7 @@ class RapFlowSkill:
                 summary=summary,
                 multi_rhyme_stats=multi_stats,
                 flow=flow_info,
+                tonal_analysis=tonal_info,
             )
 
             return output.model_dump()
@@ -151,6 +186,7 @@ class RapFlowSkill:
                 "summary": f"分析失败: {str(e)}",
                 "multi_rhyme_stats": None,
                 "flow": None,
+                "tonal_analysis": None,
             }
 
     def get_function_schema(self) -> Dict[str, Any]:

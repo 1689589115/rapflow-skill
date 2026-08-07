@@ -40,6 +40,30 @@ class FlowInfo(BaseModel):
     details: str = Field(description="分析详情")
 
 
+class TonalLineResult(BaseModel):
+    """单行声调分析结果"""
+    line_index: int = Field(description="行索引（从0开始）")
+    tone_sequence: List[int] = Field(description="该行所有字的声调序列（-1=非汉字）")
+    pattern_type: str = Field(description="声调模式类型：flat/alternating/wave")
+    tonal_entropy: float = Field(description="香农熵，度量声调多样性，range [0, log2(5)]")
+    rising_ratio: float = Field(description="升调转移比例")
+    falling_ratio: float = Field(description="降调转移比例")
+
+
+class TonalStats(BaseModel):
+    """段落级声调统计"""
+    avg_entropy: float = Field(description="整段平均声调熵")
+    dominant_pattern: str = Field(description="出现最多的 pattern_type")
+    overall_fluidity_score: float = Field(description="综合流畅度评分 [0, 100]")
+
+
+class TonalAnalysisResult(BaseModel):
+    """完整声调分析结果"""
+    lines: List[TonalLineResult] = Field(description="每行声调分析结果")
+    stats: TonalStats = Field(description="段落级统计")
+    feedback: List[str] = Field(description="自然语言质量评估建议")
+
+
 class RapFlowInput(BaseModel):
     """输入参数模型 - v1.5.0"""
     text: str = Field(description="说唱歌词文本")
@@ -48,6 +72,7 @@ class RapFlowInput(BaseModel):
     max_rhyme_level: int = Field(default=4, ge=1, le=6, description="最大押韵等级")
     detect_multi_rhyme: bool = Field(default=True, description="是否检测多押")
     analyze_flow: bool = Field(default=True, description="是否进行Flow节奏分析")
+    analyze_tonal: bool = Field(default=True, description="是否进行声调搭配分析")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -84,6 +109,7 @@ class RapFlowOutput(BaseModel):
     summary: str = Field(description="分析总结文本")
     multi_rhyme_stats: Optional[MultiRhymeStats] = Field(default=None, description="多押统计信息")
     flow: Optional[FlowInfo] = Field(default=None, description="Flow节奏分析结果")
+    tonal_analysis: Optional[TonalAnalysisResult] = Field(default=None, description="声调搭配分析结果")
 
     model_config = ConfigDict(
         json_schema_extra={
