@@ -1,5 +1,5 @@
 """
-本地直接调用示例
+本地直接调用示例 - v1.5.0
 演示如何使用RapFlow-Skill进行说唱歌词分析
 """
 
@@ -17,7 +17,7 @@ def main():
     """主函数"""
     # 创建Skill实例
     skill = RapFlowSkill()
-    
+
     # 示例说唱歌词
     lyrics = """
     我唱歌的flow 非常优秀
@@ -29,7 +29,7 @@ def main():
     音乐是我的灵魂出口
     让我自由飞翔在天空
     """
-    
+
     # 调用分析
     result = skill.run({
         "text": lyrics,
@@ -37,18 +37,19 @@ def main():
         "mark_breath": True,
         "max_rhyme_level": 4
     })
-    
+
     # 打印结果
-    print("=" * 60)
+    sep = "=" * 60
+    print(sep)
     print("RapFlow-Skill 分析结果")
-    print("=" * 60)
+    print(sep)
     print(json.dumps(result, ensure_ascii=False, indent=2))
-    
+
     # 显示每行分析
-    print("\n" + "=" * 60)
+    print("\n" + sep)
     print("逐行分析详情")
-    print("=" * 60)
-    
+    print(sep)
+
     for line_result in result["lines_result"]:
         print(f"\n第{line_result['line_index'] + 1}行:")
         print(f"  原文: {line_result['text']}")
@@ -59,14 +60,24 @@ def main():
             print(f"  韵母: {rhyme['rhymes']}")
             print(f"  等级: {rhyme['level']}")
             print(f"  密度: {rhyme['density']:.3f}")
-    
+
     # 显示总结
-    print("\n" + "=" * 60)
+    print("\n" + sep)
     print("分析总结")
-    print("=" * 60)
+    print(sep)
     print(f"总行数: {result['total_lines']}")
     print(f"平均押韵密度: {result['avg_rhyme_density']:.3f}")
     print(f"总结: {result['summary']}")
+
+    # 显示 Flow 分析
+    if result.get('flow'):
+        flow = result['flow']
+        print("\n" + sep)
+        print("Flow 节奏分析")
+        print(sep)
+        print(f"风格: {flow['style']}")
+        print(f"置信度: {flow['confidence']:.0%}")
+        print(f"详情: {flow['details']}")
 
 
 if __name__ == "__main__":

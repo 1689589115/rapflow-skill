@@ -1,10 +1,10 @@
 """
-Pydantic v2 参数模型定义 - v1.1.0（含多押检测）
+Pydantic v2 参数模型定义 - v1.5.0
 定义输入输出数据结构，严格匹配 OpenAI Function Call 格式
 """
 
 from typing import List, Optional, Dict
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class RhymeUnit(BaseModel):
@@ -33,16 +33,24 @@ class LineResult(BaseModel):
     breath_mark: Optional[str] = Field(default=None, description="带换气标记的文本")
 
 
+class FlowInfo(BaseModel):
+    """Flow节奏分析结果"""
+    style: str = Field(description="Flow风格：Boom Bap/Trap/Drill/Chopper/Melodic")
+    confidence: float = Field(description="置信度（0-1）")
+    details: str = Field(description="分析详情")
+
+
 class RapFlowInput(BaseModel):
-    """输入参数模型"""
+    """输入参数模型 - v1.5.0"""
     text: str = Field(description="说唱歌词文本")
     mode: str = Field(default="auto", description="分析模式：auto/strict/casual")
     mark_breath: bool = Field(default=True, description="是否添加换气标记")
     max_rhyme_level: int = Field(default=4, ge=1, le=6, description="最大押韵等级")
     detect_multi_rhyme: bool = Field(default=True, description="是否检测多押")
+    analyze_flow: bool = Field(default=True, description="是否进行Flow节奏分析")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "text": "小镇的男孩儿现在做着嘻哈这门生意\n我们不姓谢但也是老板儿",
                 "mode": "auto",
@@ -51,6 +59,7 @@ class RapFlowInput(BaseModel):
                 "detect_multi_rhyme": True
             }
         }
+    )
 
 
 class MultiRhymeStats(BaseModel):
@@ -66,7 +75,7 @@ class MultiRhymeStats(BaseModel):
 
 
 class RapFlowOutput(BaseModel):
-    """输出结果模型"""
+    """输出结果模型 - v1.5.0"""
     success: bool = Field(description="是否成功")
     mode: str = Field(description="分析模式")
     total_lines: int = Field(description="总行数")
@@ -74,9 +83,10 @@ class RapFlowOutput(BaseModel):
     lines_result: List[LineResult] = Field(description="每行分析结果")
     summary: str = Field(description="分析总结文本")
     multi_rhyme_stats: Optional[MultiRhymeStats] = Field(default=None, description="多押统计信息")
+    flow: Optional[FlowInfo] = Field(default=None, description="Flow节奏分析结果")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "success": True,
                 "mode": "auto",
@@ -109,3 +119,4 @@ class RapFlowOutput(BaseModel):
                 }
             }
         }
+    )

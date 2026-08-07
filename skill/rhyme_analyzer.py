@@ -1,11 +1,12 @@
 """
-Core Rhyme Analysis Algorithm - v1.3.0 (Rhyme Normalization)
-基于pypinyin自动生成 + 韵母归一化优化
+Core Rhyme Analysis Algorithm - v1.5.0 (Rhyme Normalization + Flow Analysis)
+基于pypinyin自动生成 + 韵母归一化 + Flow节奏分析
 """
 
 from typing import Dict, List, Optional, Tuple
 from collections import Counter
 from .schemas import LineResult, RhymeUnit, MultiRhymeInfo, MultiRhymeStats
+from .utils import insert_breath_mark
 
 
 # ============================================
@@ -168,7 +169,7 @@ FINAL_MAP = _load_extended_rhyme_map()
 
 
 class RhymeAnalyzer:
-    """Chinese Rap Rhyme Analyzer - v1.3.0 (with Rhyme Normalization)"""
+    """Chinese Rap Rhyme Analyzer - v1.5.0 (with Rhyme Normalization & Flow Analysis)"""
     
     def __init__(self, mode: str = "auto", max_level: int = 4, 
                  normalize: bool = True):
@@ -383,23 +384,8 @@ class RhymeAnalyzer:
         )
     
     def _add_breath_mark(self, text: str) -> str:
-        """Add breath marks"""
-        chinese_count = sum(1 for c in text if '\u4e00' <= c <= '\u9fa5')
-        
-        if chinese_count <= 8:
-            return text
-        
-        result = []
-        count = 0
-        for char in text:
-            result.append(char)
-            if '\u4e00' <= char <= '\u9fa5':
-                count += 1
-                if count == 8:
-                    result.append(' / ')
-                    count = 0
-        
-        return ''.join(result)
+        """\u6dfb\u52a0\u6362\u6c14\u6807\u8bb0\uff08\u59d4\u6258\u7ed9 utils.insert_breath_mark\uff09"""
+        return insert_breath_mark(text)
     
     def _generate_summary(self, lines, results, avg_density, multi_rhyme_counts):
         """Generate analysis summary"""

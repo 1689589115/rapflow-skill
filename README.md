@@ -1,6 +1,6 @@
 # RapFlow-Skill
 
-**v1.3.0** - 韵母归一化系统（推荐版本）
+**v1.4.0** - Flow节奏分析 + 韵母归一化系统（推荐版本）
 
 中文说唱文本分析技能，面向LLM Function Call的押韵分析工具。
 
@@ -10,7 +10,7 @@
 |------|----------|----------|------|
 | v1.1.0 | 2026-08-04 | 多押检测 | ✅ Released |
 | v1.2.0 | 2026-08-04 | 韵母数据库扩展(20,992字) | ✅ Released |
-| **v1.3.0** | 2026-08-04 | **韵母归一化系统** | ⭐ **Recommended** |
+| **v1.4.0** | 2026-08-05 | **Flow节奏分析** | ⭐ **Recommended** |
 
 ---
 
@@ -39,8 +39,8 @@ RapFlow-Skill 是一个 Python 技能库，专为大模型工具调用设计，�
 - **韵母归一化**：智能合并相似韵母（v1.3.0新增）
 - **换气标记**：自动在歌词中插入换气标记 `/`
 - **押韵密度**：计算每行和整体的押韵密度
+- **Flow节奏分析**：识别 Boom Bap、Trap、Drill、Chopper 等节奏类型
 - **Function Call**：标准 OpenAI 格式工具定义，开箱即用
-- **兼容性强**：支持 OpenAI、DeepSeek、豆包等主流 LLM
 
 ---
 
@@ -49,7 +49,6 @@ RapFlow-Skill 是一个 Python 技能库，专为大模型工具调用设计，�
 - Python 3.10+
 - 依赖包：
   - pydantic >= 2.8
-  - jieba >= 0.42.1
   - pypinyin >= 0.50.0（可选，用于自动生成韵母映射）
 
 ---
@@ -90,8 +89,7 @@ result = skill.run({
     "mode": "auto",
     "mark_breath": True,
     "max_rhyme_level": 4,
-    "detect_multi_rhyme": True,
-    "normalize": True  # v1.3.0新增参数
+    "detect_multi_rhyme": True
 })
 
 print(result)
@@ -159,7 +157,6 @@ if response.choices[0].message.get('tool_calls'):
 | `mark_breath` | bool | 否 | 是否添加换气标记，默认 True |
 | `max_rhyme_level` | int | 否 | 最大押韵等级（1-6），默认 4 |
 | `detect_multi_rhyme` | bool | 否 | 是否检测多押，默认 True |
-| `normalize` | bool | 否 | **v1.3.0新增** 是否启用韵母归一化，默认 True |
 
 ### 输出结构
 
@@ -336,7 +333,7 @@ rapflow-skill/
 - [ ] 支持英文押韵分析
 - [ ] 提供Web API接口
 - [ ] 集成更多LLM平台
-- [ ] Flow节奏分析
+- [x] Flow节奏分析（v1.4.0）
 - [ ] AI押韵推荐引擎
 
 ---
@@ -362,7 +359,7 @@ rapflow-skill/
 ## 致谢
 
 - 感谢所有开源贡献者
-- 基于 Pydantic v2、jieba 和 pypinyin 构建
+- 基于 Pydantic v2 和 pypinyin 构建
 - 受中文说唱文化的启发
 
 ---
