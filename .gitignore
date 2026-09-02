@@ -46,6 +46,9 @@ Thumbs.db
 *.tmp
 *.temp
 
+# Claude IDE settings (not needed in repo)
+.claude/
+
 # Debug/dev scripts (not needed in release)
 diagnose_*.py
 verify_bug.py
@@ -58,3 +61,15 @@ NeteaseCloudMusicApi/
 mineradio-analysis/
 scripts/
 _fix/
+
+# Build/release artifacts
+release_*/
+*.whl
+*.tar.gz
+rapflow_skill.egg-info/
+build/
+
+# Dashboard and raw data exports
+dashboard_data.json
+lyrics_data.json
+data/raw/
