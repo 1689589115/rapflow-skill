@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "rapflow": {
+      "command": "python",
+      "args": [
+        "C:\\Users\\七安\\Desktop\\rap\\mcp_server.py",
+        "--mode",
+        "server"
+      ],
+      "env": {
+        "PYTHONIOENCODING": "utf-8"
+      }
+    }
+  }
+}

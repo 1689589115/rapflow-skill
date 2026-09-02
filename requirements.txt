@@ -1,2 +1,8 @@
-pydantic>=2.8
-pytest>=7.0
+streamlit>=1.30.0
+httpx>=0.27.0
+python-dotenv>=1.0.0
+pypinyin>=0.51.0
+requests>=2.31.0
+pycryptodome>=3.20.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
