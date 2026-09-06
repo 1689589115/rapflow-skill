@@ -19,14 +19,22 @@ from src.llm_analyzer import LLMAnalyzer
 import dotenv
 dotenv.load_dotenv()
 
+<<<<<<< HEAD
 # Cloud 环境优先从 streamlit secrets 读取，兜底本地环境变量
+=======
+# Cloud 环境优先从 secrets 读取，否则回退到 .env
+>>>>>>> dc65a9cbbb4eedd184fe2138b59137831965b768
 _secret_key = ""
 try:
     _secret_key = st.secrets["agnes"]["api_key"]
 except Exception:
     pass
 import os as _os
+<<<<<<< HEAD
 if _secret_key:
+=======
+if _secret_key and not _os.getenv("AGNES_API_KEY"):
+>>>>>>> dc65a9cbbb4eedd184fe2138b59137831965b768
     _os.environ["AGNES_API_KEY"] = _secret_key
 
 print('=' * 50)
