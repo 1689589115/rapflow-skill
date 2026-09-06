@@ -19,14 +19,15 @@ from src.llm_analyzer import LLMAnalyzer
 import dotenv
 dotenv.load_dotenv()
 
-# Cloud 环境优先从 secrets 读取，否则回退到 .env
+# Cloud 环境优先从 streamlit secrets 读取，兜底本地环境变量
+_secret_key = ""
 try:
     _secret_key = st.secrets["agnes"]["api_key"]
-    import os as _os
-    if not _os.getenv("AGNES_API_KEY"):
-        _os.environ["AGNES_API_KEY"] = _secret_key
 except Exception:
     pass
+import os as _os
+if _secret_key:
+    _os.environ["AGNES_API_KEY"] = _secret_key
 
 print('=' * 50)
 print('RapFlow v1.0 startup...')
@@ -184,7 +185,6 @@ with tab1:
                     )
 
                     import httpx
-                    import os as _os
                     api_key = _os.getenv("AGNES_API_KEY", "")
                     if not api_key:
                         raise ValueError("未设置 AGNES_API_KEY")
