@@ -19,14 +19,14 @@ from src.llm_analyzer import LLMAnalyzer
 import dotenv
 dotenv.load_dotenv()
 
-# Cloud 环境优先从 streamlit secrets 读取，兜底本地环境变量
+# Cloud 环境优先�?streamlit secrets 读取，兜底本地环境变�?
 _secret_key = ""
 try:
     _secret_key = st.secrets["agnes"]["api_key"]
 except Exception:
     pass
 import os as _os
-# secrets 非空时始终覆盖（优先级高于 .env）
+# secrets 非空时始终覆盖（优先级高�?.env�?
 if _secret_key:
     _os.environ["AGNES_API_KEY"] = _secret_key
 
@@ -62,19 +62,19 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 侧边栏
+# 侧边�?
 with st.sidebar:
     st.markdown("<h2 style='color: #1DB954;'>🎤 RapFlow</h2>", unsafe_allow_html=True)
     st.markdown("---")
-    st.markdown("### 📚 参考风格")
+    st.markdown("### 📚 参考风�?)
     reference_artist = st.selectbox(
         "模仿哪位歌手的风格？",
-        ["Jony J", "马思唯", "法老", "刘聪", "MC Hotdog", "Tizzy T", "自定义"],
+        ["Jony J", "马思唯", "法�?, "刘聪", "MC Hotdog", "Tizzy T", "自定�?],
         key="ref_artist_select",
     )
-    if reference_artist == "自定义":
+    if reference_artist == "自定�?:
         custom_artist = st.text_input(
-            "输入歌手名",
+            "输入歌手�?,
             placeholder="例如：GAI",
             key="custom_artist_input",
         )
@@ -84,13 +84,13 @@ with st.sidebar:
     st.markdown("### ✍️ 创作要求")
     topic = st.text_area(
         "主题/内容",
-        placeholder="例如：北漂的故事、奋斗、爱情...",
+        placeholder="例如：北漂的故事、奋斗、爱�?..",
         height=100,
         key="topic_textarea",
     )
     mood = st.selectbox(
         "情绪",
-        ["激昂", "沉稳", "悲伤", "愤怒", "轻松", "怀旧"],
+        ["激�?, "沉稳", "悲伤", "愤�?, "轻松", "怀�?],
         key="mood_select",
     )
     rhyme_density = st.slider(
@@ -100,7 +100,7 @@ with st.sidebar:
     )
     flow_style = st.selectbox(
         "Flow风格",
-        ["中速平衡", "快嘴密集", "慢速留白", "切分复杂"],
+        ["中速平�?, "快嘴密集", "慢速留�?, "切分复杂"],
         key="flow_style_select",
     )
     model_choice = st.selectbox(
@@ -112,20 +112,20 @@ with st.sidebar:
     st.markdown("---")
     st.caption("RapFlow v1.0 | 中文说唱歌词创作助手")
 
-# 主界面
+# 主界�?
 st.markdown("<div class='main-header'>🎤 RapFlow 歌词创作助手</div>", unsafe_allow_html=True)
 st.markdown("<div class='sub-header'>基于 AI 的中文说唱歌词生成与分析平台</div>", unsafe_allow_html=True)
 
 tab1, tab2, tab3 = st.tabs(["🎵 歌词创作", "📊 实时搜索", "🧠 风格分析"])
 
-# ── Tab 1：歌词创作 ───────────────────────────────────────────────────────
+# ── Tab 1：歌词创�?───────────────────────────────────────────────────────
 with tab1:
     # 顶部控制栏：全宽横排（用 container + HTML 样式，按钮在容器外）
     st.markdown("<div style='background:#1a1a1a;border-radius:10px;padding:1rem 1.2rem;margin-bottom:0.5rem;'>", unsafe_allow_html=True)
     st.markdown("### ✍️ 歌词创作")
     col_ctrl1, col_ctrl2 = st.columns([4, 2])
     with col_ctrl1:
-        st.markdown(f"**当前设置** &nbsp;·&nbsp; 🎤 {reference_artist} &nbsp;|&nbsp; 📝 {topic or '未设置主题'} &nbsp;|&nbsp; 🎭 {mood}")
+        st.markdown(f"**当前设置** &nbsp;·&nbsp; 🎤 {reference_artist} &nbsp;|&nbsp; 📝 {topic or '未设置主�?} &nbsp;|&nbsp; 🎭 {mood}")
     with col_ctrl2:
         st.markdown(f"**押韵密度** `{rhyme_density}/10` &nbsp;·&nbsp; **Flow** {flow_style}")
     st.markdown("</div>", unsafe_allow_html=True)
@@ -135,10 +135,10 @@ with tab1:
         st.warning("⚠️ 请先在侧边栏输入主题/内容")
     else:
         created = st.session_state.get("_lyrics_created", False)
-        if st.button("🚀 开始创作", type="primary", key="btn_create"):
+        if st.button("🚀 开始创�?, type="primary", key="btn_create"):
             st.session_state["_btn_create_clicked"] = True
             st.session_state["_lyrics_created"] = True
-            with st.spinner(f"正在生成 {reference_artist} 风格的歌词..."):
+            with st.spinner(f"正在生成 {reference_artist} 风格的歌�?.."):
                 try:
                     import sqlite3
                     db_path = Path(__file__).parent / "lyrics-crawler" / "data" / "lyrics_corpus.db"
@@ -156,12 +156,12 @@ with tab1:
 
                     rhymepct = rhyme_density / 10.0
                     prompts = {
-                        "中速平衡": "使用中等语速，节奏平稳，押韵自然流畅。",
-                        "快嘴密集": "使用高速密集flow，一分钟内多次换韵，押韵密度要高。",
-                        "慢速留白": "使用慢速flow，每句之间有明显停顿留白，重情感表达。",
-                        "切分复杂": "使用复杂切分节奏，重音偏移节拍，制造意外的律动感。",
+                        "中速平�?: "使用中等语速，节奏平稳，押韵自然流畅�?,
+                        "快嘴密集": "使用高速密集flow，一分钟内多次换韵，押韵密度要高�?,
+                        "慢速留�?: "使用慢速flow，每句之间有明显停顿留白，重情感表达�?,
+                        "切分复杂": "使用复杂切分节奏，重音偏移节拍，制造意外的律动感�?,
                     }
-                    flow_instruction = prompts.get(flow_style, prompts["中速平衡"])
+                    flow_instruction = prompts.get(flow_style, prompts["中速平�?])
 
                     user_prompt = (
                         f"请为以下参数创作一段中文说唱歌词：\n\n"
@@ -180,15 +180,15 @@ with tab1:
                         f"5. 只输出歌词，不要任何解释或开场白"
                     )
                     system_prompt = (
-                        "你是一位专业的中文说唱歌词创作者，擅长模仿不同歌手的风格。"
-                        "你精通中文押韵技巧，包括单押、双押、三押、多押和换韵。"
-                        "你的歌词既有技术含量又有情感深度。"
+                        "你是一位专业的中文说唱歌词创作者，擅长模仿不同歌手的风格�?
+                        "你精通中文押韵技巧，包括单押、双押、三押、多押和换韵�?
+                        "你的歌词既有技术含量又有情感深度�?
                     )
 
                     import httpx
                     api_key = _os.getenv("AGNES_API_KEY", "")
                     if not api_key:
-                        raise ValueError("未设置 AGNES_API_KEY")
+                        raise ValueError("未设�?AGNES_API_KEY")
 
                     headers = {
                         "Authorization": f"Bearer {api_key}",
@@ -213,9 +213,9 @@ with tab1:
                         generated = resp.json()["choices"][0]["message"]["content"]
                     st.session_state["_generated_lyrics"] = generated
                     st.session_state["_generated_artist"] = reference_artist
-                    st.success(f"✅ {reference_artist} 风格歌词已生成！")
+                    st.success(f"�?{reference_artist} 风格歌词已生成！")
 
-                    # ── 全宽歌词展示区 ──
+                    # ── 全宽歌词展示�?──
                     st.markdown("---")
                     lyr_col1, lyr_col2 = st.columns([4, 1])
                     with lyr_col1:
@@ -248,12 +248,12 @@ with tab1:
                         with mcol3:
                             st.markdown("**🎹 声调分析**")
                             tonal_result = analyse_lyric_tones(gen_lines)
-                            st.metric("声调流畅度", f"{tonal_result['stats']['overall_fluidity_score']:.0f}")
+                            st.metric("声调流畅�?, f"{tonal_result['stats']['overall_fluidity_score']:.0f}")
                         st.caption(f"**押韵总结:** {summary}")
 
                         # ── AI 乐评 ──
                         if llm_model != "mock":
-                            with st.spinner("LLM 解说中..."):
+                            with st.spinner("LLM 解说�?.."):
                                 llm = LLMAnalyzer(model=llm_model)
                                 insight = llm.analyze(
                                     generated,
@@ -275,7 +275,7 @@ with tab1:
                     logger.warning("创作异常: %r", exc)
             st.session_state["_btn_create_clicked"] = False
 
-        # 已生成时重新渲染结果（保持布局稳定）
+        # 已生成时重新渲染结果（保持布局稳定�?
         if created and st.session_state.get("_generated_lyrics"):
             generated = st.session_state["_generated_lyrics"]
             ref_artist = st.session_state.get("_generated_artist", reference_artist)
@@ -310,7 +310,7 @@ with tab1:
                 with mcol3:
                     st.markdown("**🎹 声调分析**")
                     tonal_result = analyse_lyric_tones(gen_lines)
-                    st.metric("声调流畅度", f"{tonal_result['stats']['overall_fluidity_score']:.0f}")
+                    st.metric("声调流畅�?, f"{tonal_result['stats']['overall_fluidity_score']:.0f}")
                 st.caption(f"**押韵总结:** {summary}")
 
                 if llm_model != "mock" and st.session_state.get("_insight"):
@@ -320,13 +320,13 @@ with tab1:
 
     st.markdown("---")
 
-# ── Tab 2：实时搜索 ──────────────────────────────────────────────────────
+# ── Tab 2：实时搜�?──────────────────────────────────────────────────────
 with tab2:
     st.markdown("### 🔍 实时搜索歌词")
     col1, col2 = st.columns(2)
     with col1:
         search_artist = st.text_input(
-            "歌手名",
+            "歌手�?,
             placeholder="例如：马思唯",
             key="search_artist_input",
         )
@@ -338,7 +338,7 @@ with tab2:
         )
     if st.button("Search", type="primary", key="btn_search"):
         if not search_artist or not search_song:
-            st.warning("请输入歌手名和歌名")
+            st.warning("请输入歌手名和歌�?)
         else:
             result = None
             show_warning = ""
@@ -349,18 +349,18 @@ with tab2:
                     show_warning = f'搜索失败: {e}'
 
             if result:
-                source_label = {"netease": "网易云音乐", "kugou": "酷狗音乐"}.get(result['source'], "联网")
-                st.success(f"✅ 找到歌词！来源: {source_label} | 置信度: {result['confidence']:.0%}")
+                source_label = {"netease": "网易云音�?, "kugou": "酷狗音乐"}.get(result['source'], "联网")
+                st.success(f"�?找到歌词！来�? {source_label} | 置信�? {result['confidence']:.0%}")
                 st.markdown(f"**歌手:** {result['artist']}")
                 st.markdown(f"**歌名:** {result['song']}")
             else:
-                st.error(f"未找到 '{search_artist} - {search_song}' 的歌词")
-                st.info("提示：请检查歌手/歌名拼写，或尝试其他写法")
+                st.error(f"未找�?'{search_artist} - {search_song}' 的歌�?)
+                st.info("提示：请检查歌�?歌名拼写，或尝试其他写法")
 
             if show_warning:
                 st.warning(show_warning)
 
-            # 有结果则展示歌词和分析
+            # 有结果则展示歌词和分�?
             if result:
                 st.markdown("---")
                 raw_lyrics = result.get('lyrics', '')
@@ -399,7 +399,7 @@ with tab2:
                         with col_a3:
                             st.markdown("#### 🎹 声调分析")
                             tonal_result = analyse_lyric_tones(lines)
-                            st.metric("声调流畅度", f"{tonal_result['stats']['overall_fluidity_score']:.0f}")
+                            st.metric("声调流畅�?, f"{tonal_result['stats']['overall_fluidity_score']:.0f}")
 
                         st.markdown(f"**押韵总结:** {summary}")
                         if 'details' in flow_result:
@@ -407,19 +407,19 @@ with tab2:
                         if tonal_result.get('feedback'):
                             st.markdown("**声调建议:**")
                             for fb in tonal_result['feedback'][:3]:
-                                st.caption(f"• {fb}")
+                                st.caption(f"�?{fb}")
                     except Exception as e:
                         st.warning(f"分析失败: {e}")
                         import traceback
                         st.code(traceback.format_exc())
 
-# ── Tab 3：风格分析 ──────────────────────────────────────────────────────
+# ── Tab 3：风格分�?──────────────────────────────────────────────────────
 with tab3:
     st.markdown("### 🧠 歌手风格分析")
     col1, col2 = st.columns(2)
     with col1:
         analyze_artist = st.text_input(
-            "歌手名",
+            "歌手�?,
             placeholder="例如：马思唯",
             key="analyze_artist_input",
         )
@@ -433,7 +433,7 @@ with tab3:
         if not analyze_artist:
             st.warning("请输入歌手名")
         else:
-            with st.spinner(f"正在分析 {analyze_artist} 的风格..."):
+            with st.spinner(f"正在分析 {analyze_artist} 的风�?.."):
                 try:
                     import sqlite3
                     db_path = Path(__file__).parent / "lyrics-crawler" / "data" / "lyrics_corpus.db"
@@ -443,7 +443,7 @@ with tab3:
                     songs = c.fetchall()
                     conn.close()
                     if not songs:
-                        st.error(f"未找到 '{analyze_artist}' 的歌曲")
+                        st.error(f"未找�?'{analyze_artist}' 的歌�?)
                     else:
                         song_name, lyrics = songs[0]
                         lines = [line.strip() for line in lyrics.split('\n') if line.strip()]
@@ -454,7 +454,7 @@ with tab3:
                         flow_result = analyze_flow(lines, rhyme_densities)
                         tonal_result = analyse_lyric_tones(lines)
 
-                        st.success(f"分析完成！找到 {len(songs)} 首歌")
+                        st.success(f"分析完成！找�?{len(songs)} 首歌")
                         col1, col2, col3 = st.columns(3)
                         with col1:
                             st.markdown("#### 🎵 押韵分析")
@@ -468,7 +468,7 @@ with tab3:
                             st.metric("Flow 风格", flow_result['style'])
                         with col3:
                             st.markdown("#### 🎹 声调分析")
-                            st.metric("声调流畅度", f"{tonal_result['stats']['overall_fluidity_score']:.0f}")
+                            st.metric("声调流畅�?, f"{tonal_result['stats']['overall_fluidity_score']:.0f}")
                         st.markdown("---")
                         st.markdown(f"**押韵总结:** {summary}")
                         if 'details' in flow_result:
@@ -476,11 +476,11 @@ with tab3:
                         if tonal_result.get('feedback'):
                             st.markdown("**声调建议:**")
                             for fb in tonal_result['feedback'][:3]:
-                                st.caption(f"• {fb}")
+                                st.caption(f"�?{fb}")
                 except Exception as e:
                     st.error(f"分析失败: {e}")
                     import traceback
                     st.code(traceback.format_exc())
 
 st.markdown("---")
-st.markdown("<div style='text-align: center; color: #666; padding: 1rem;'><p>RapFlow v1.0 | 中文说唱歌词创作助手</p><p>网易云 + 酷狗 | 3-Way Analysis</p></div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: #666; padding: 1rem;'><p>RapFlow v1.0 | 中文说唱歌词创作助手</p><p>网易�?+ 酷狗 | 3-Way Analysis</p></div>", unsafe_allow_html=True)
