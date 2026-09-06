@@ -20,13 +20,14 @@ import dotenv
 dotenv.load_dotenv()
 
 # Cloud 环境优先从 secrets 读取，否则回退到 .env
+_secret_key = ""
 try:
     _secret_key = st.secrets["agnes"]["api_key"]
-    import os as _os
-    if not _os.getenv("AGNES_API_KEY"):
-        _os.environ["AGNES_API_KEY"] = _secret_key
 except Exception:
     pass
+import os as _os
+if _secret_key and not _os.getenv("AGNES_API_KEY"):
+    _os.environ["AGNES_API_KEY"] = _secret_key
 
 print('=' * 50)
 print('RapFlow v1.0 startup...')
