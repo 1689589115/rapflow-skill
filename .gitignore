@@ -1,14 +1,75 @@
-dist/
-*.egg-info/
-build/
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-*.pyo
-.pytest_cache/
+*.py[cod]
+*\.class
+
+# Virtual environments
 venv/
+env/
 .venv/
-release_*/
+
+# Streamlit cache
+.streamlit/cache/
+
+# Environment variables
+.env
+.env.local
+
+# Python build artifacts
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Database files (user-specific, large)
+lyrics-crawler/data/*.db
+lyrics-crawler/data/*.db-shm
+lyrics-crawler/data/*.db-wal
+
+# Generated reports
+lyrics-crawler/reports/
+
+# Test caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# OS files
 .DS_Store
-*.swp
-*.swo
-.coverage
+Thumbs.db
+
+# Backup files
+*.backup
+*.bak
+
+# Temp files
+*.tmp
+*.temp
+
+# Claude IDE settings (not needed in repo)
+.claude/
+
+# Debug/dev scripts (not needed in release)
+diagnose_*.py
+verify_bug.py
+cleanup_app.py
+test_api.py
+fix_bugs.py
+
+# Unrelated third-party projects
+NeteaseCloudMusicApi/
+mineradio-analysis/
+scripts/
+_fix/
+
+# Build/release artifacts
+release_*/
+*.whl
+*.tar.gz
+rapflow_skill.egg-info/
+build/
+
+# Dashboard and raw data exports
+dashboard_data.json
+lyrics_data.json
+data/raw/

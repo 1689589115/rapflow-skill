@@ -1,0 +1,4 @@
+# Test Artist — Test Song (via manual)
+这是一段测试歌词
+这是第二段歌词
+这是第三段歌词
